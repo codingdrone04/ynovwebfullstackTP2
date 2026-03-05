@@ -4,12 +4,14 @@ const users = require("../data/users");
 
 let nextId = users.length + 1;
 
-// GET /api/users — liste tous les utilisateurs
-router.get("/", (_req, res) => {
+// GET /api/users — liste tous les utilisateurs (bonus A : ?role=admin)
+router.get("/", (req, res) => {
+  const { role } = req.query;
+  const result = role ? users.filter((u) => u.role === role) : users;
   res.status(200).json({
     success: true,
-    count: users.length,
-    data: users,
+    count: result.length,
+    data: result,
   });
 });
 
@@ -28,6 +30,11 @@ router.post("/", (req, res) => {
 
   if (!name || !email) {
     return res.status(400).json({ success: false, message: "Les champs name et email sont requis" });
+  }
+
+  // Bonus B : email unique
+  if (users.some((u) => u.email === email)) {
+    return res.status(409).json({ success: false, message: "Cet email est déjà utilisé" });
   }
 
   const newUser = {
@@ -50,6 +57,12 @@ router.put("/:id", (req, res) => {
   }
 
   const { name, email, role } = req.body;
+
+  // Bonus B : email unique (exclure l'utilisateur courant)
+  if (email !== undefined && users.some((u) => u.email === email && u.id !== users[index].id)) {
+    return res.status(409).json({ success: false, message: "Cet email est déjà utilisé" });
+  }
+
   if (name !== undefined) users[index].name = name;
   if (email !== undefined) users[index].email = email;
   if (role !== undefined) users[index].role = role;
