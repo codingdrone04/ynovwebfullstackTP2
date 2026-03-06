@@ -1,47 +1,10 @@
-const users = require("../data/users");
+const mongoose = require("mongoose");
 
-let nextId = users.length + 1;
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  role: { type: String, enum: ["admin", "user"], default: "user" },
+  createdAt: { type: Date, default: Date.now },
+});
 
-function findAll(role) {
-  if (role) return users.filter((u) => u.role === role);
-  return users;
-}
-
-function findById(id) {
-  return users.find((u) => u.id === id);
-}
-
-function emailExists(email, excludeId = null) {
-  return users.some((u) => u.email === email && u.id !== excludeId);
-}
-
-function create({ name, email, role }) {
-  const newUser = {
-    id: nextId++,
-    name,
-    email,
-    role: role || "user",
-    createdAt: new Date().toISOString().split("T")[0],
-  };
-  users.push(newUser);
-  return newUser;
-}
-
-function update(id, fields) {
-  const index = users.findIndex((u) => u.id === id);
-  if (index === -1) return null;
-  const { name, email, role } = fields;
-  if (name !== undefined) users[index].name = name;
-  if (email !== undefined) users[index].email = email;
-  if (role !== undefined) users[index].role = role;
-  return users[index];
-}
-
-function remove(id) {
-  const index = users.findIndex((u) => u.id === id);
-  if (index === -1) return false;
-  users.splice(index, 1);
-  return true;
-}
-
-module.exports = { findAll, findById, emailExists, create, update, remove };
+module.exports = mongoose.model("User", userSchema);
