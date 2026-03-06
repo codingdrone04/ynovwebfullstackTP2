@@ -1,0 +1,13 @@
+import axios from 'axios'
+
+const api = axios.create({ baseURL: '/api' })
+
+const userService = {
+  getAll: () => api.get('/users'),
+  getById: (id) => api.get(`/users/${id}`),
+  create: (data) => api.post('/users', data),
+  update: (id, data) => api.put(`/users/${id}`, data),
+  remove: (id) => api.delete(`/users/${id}`),
+}
+
+export default userService
